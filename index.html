@@ -26,13 +26,20 @@
 <style>
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;padding:0;height:100%;overflow:hidden}
+  /* Match the page bg behind safe-area insets so the iOS home-indicator
+     area and status bar inherit the navy/black/bone/forest bg instead of
+     showing the default black system band. */
+  html{background:var(--bg);transition:background .8s ease}
   body{
     font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;
     background:var(--bg);
     color:var(--fg);
     transition:background .8s ease, color .8s ease;
     -webkit-font-smoothing:antialiased;
-    /* respect iOS safe areas when installed as PWA */
+    /* iOS PWA: pad for the status bar + home indicator and make the body a
+       positioning context so children with position:absolute/inset:0 land
+       inside the safe area instead of underneath the status bar. */
+    position:relative;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
   :root{
