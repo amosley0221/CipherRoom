@@ -258,20 +258,33 @@ function Game({ levelIdx, levels, onSolve, onBack, palette, hintsEnabled, soundE
             <EnvelopeOverlay onOpen={() => { setArtifactOpened(true); window.AudioFX.click(); }} palette={palette}/>
           )}
 
-          {/* Evidence overlay — appears when opened */}
-          {artifactOpened && (
+          {/* Evidence overlay — appears when opened. Glass tint flips per
+              palette so the dark text on the bone palette stays readable
+              instead of being lost on a dark scrim. */}
+          {artifactOpened && (() => {
+            const c = (palette.bg || "#000").replace("#","");
+            const luma = (parseInt(c.slice(0,2),16)*299 + parseInt(c.slice(2,4),16)*587 + parseInt(c.slice(4,6),16)*114) / 1000;
+            const light = luma > 128;
+            return (
             <div style={{
               position:"absolute", left:18, right:18, bottom:18,
               padding:"16px 20px",
-              background:"rgba(0,0,0,.55)", backdropFilter:"blur(12px)",
-              border:`1px solid ${palette.accent}55`,
+              background: light ? "rgba(255,255,255,.88)" : "rgba(0,0,0,.62)",
+              backdropFilter:"blur(12px)",
+              WebkitBackdropFilter:"blur(12px)",
+              border:`1px solid ${palette.accent}66`,
+              boxShadow: light
+                ? "0 10px 30px rgba(0,0,0,.18)"
+                : "0 10px 30px rgba(0,0,0,.45)",
+              color: palette.fg,
               animation:"fadeUp .6s ease both",
               zIndex:5, maxHeight:"60%", overflow:"auto"
             }}>
               <div className="eyebrow" style={{marginBottom:10,color:palette.accent}}>▸ Evidence</div>
               <ArtifactContent level={level} palette={palette}/>
             </div>
-          )}
+            );
+          })()}
         </div>
       </div>
     </div>
