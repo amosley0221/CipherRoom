@@ -1,8 +1,11 @@
 // Cipher Room service worker.
-// Strategy: cache-first for app shell + JSX modules, network-first for everything else
-// (so CDN React/Three updates aren't pinned by stale caches when online).
+// Strategy:
+//   - Navigation requests (HTML): network-first with cache fallback. iOS PWAs
+//     cache very aggressively and a stale-while-revalidate index.html keeps
+//     users one load behind for layout / meta-tag fixes.
+//   - JSX modules + CDN libs + assets: stale-while-revalidate.
 
-const VERSION = "v2";
+const VERSION = "v3";
 const SHELL_CACHE = `cipher-shell-${VERSION}`;
 const RUNTIME_CACHE = `cipher-runtime-${VERSION}`;
 
@@ -53,15 +56,38 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
-  // Same-origin shell + JSX -> cache-first with background revalidate
+  // Navigation / HTML -> network-first so layout & meta updates land on
+  // the very next reload, not two reloads later. iOS PWAs are otherwise
+  // famously sticky.
+  const isNavigation =
+    req.mode === "navigate" ||
+    (req.destination === "" && req.headers.get("accept")?.includes("text/html"));
+  if (isNavigation) {
+    event.respondWith(networkFirst(req, SHELL_CACHE));
+    return;
+  }
+
   if (url.origin === self.location.origin) {
     event.respondWith(staleWhileRevalidate(req, SHELL_CACHE));
     return;
   }
 
-  // Cross-origin (CDN libs, fonts) -> cache-first with long-lived runtime cache
   event.respondWith(staleWhileRevalidate(req, RUNTIME_CACHE));
 });
+
+async function networkFirst(req, cacheName) {
+  const cache = await caches.open(cacheName);
+  try {
+    const fresh = await fetch(req);
+    if (fresh && fresh.status === 200) cache.put(req, fresh.clone());
+    return fresh;
+  } catch (e) {
+    const cached = await cache.match(req);
+    if (cached) return cached;
+    // last-ditch: any cached index.html
+    return (await cache.match("/index.html")) || (await cache.match("/")) || Response.error();
+  }
+}
 
 async function staleWhileRevalidate(req, cacheName) {
   const cache = await caches.open(cacheName);
@@ -76,3 +102,8 @@ async function staleWhileRevalidate(req, cacheName) {
     .catch(() => cached);
   return cached || network;
 }
+
+// Allow the page to ask the SW to skip waiting (used on first install of v3).
+self.addEventListener("message", (event) => {
+  if (event.data === "skipWaiting") self.skipWaiting();
+});
