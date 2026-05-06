@@ -52,6 +52,16 @@ function applyPaletteVars(p) {
   r.setProperty("--accent", p.accent);
   r.setProperty("--accent-soft", p.accentSoft);
   r.setProperty("--rule", p.rule);
+  // Keep iOS Safari's chrome / PWA splash / Android task-switcher tint in sync
+  // with the active palette. Without this they stay locked to whatever was in
+  // the static <meta name="theme-color"> tag and leave a mismatched band.
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute("content", p.bg);
 }
 
 function App() {
