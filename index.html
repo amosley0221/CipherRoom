@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>The Cipher Room</title>
+<meta name="description" content="A thriller-themed puzzle site. Four tracks of cryptic chapters with 3D artifacts, ambient drones, and original mechanics." />
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#0c1530" />
+<meta name="color-scheme" content="dark" />
+
+<!-- iOS add-to-home-screen -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Cipher" />
+<link rel="apple-touch-icon" href="/icons/icon-192.png" />
+<link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden}
+  body{
+    font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    background:var(--bg);
+    color:var(--fg);
+    transition:background .8s ease, color .8s ease;
+    -webkit-font-smoothing:antialiased;
+    /* respect iOS safe areas when installed as PWA */
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  :root{
+    --bg:#0c1530;
+    --bg-soft:#0f1b3d;
+    --bg-paper:#11214a;
+    --fg:#e9e6d6;
+    --fg-mute:rgba(233,230,214,.55);
+    --fg-faint:rgba(233,230,214,.28);
+    --accent:#f7d44b;
+    --accent-soft:rgba(247,212,75,.18);
+    --rule:rgba(233,230,214,.12);
+    --danger:#ef6c5a;
+    --serif:"Fraunces", "Instrument Serif", Georgia, serif;
+    --display:"Instrument Serif", "Fraunces", Georgia, serif;
+    --mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  ::selection{background:var(--accent);color:#0c1530}
+  /* tiny scrollbar where it appears */
+  *::-webkit-scrollbar{width:6px;height:6px}
+  *::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
+
+  /* film grain overlay */
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:9999;mix-blend-mode:overlay;opacity:.18}
+  .vignette{position:fixed;inset:0;pointer-events:none;z-index:9998;
+    background:radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,.55) 110%)}
+
+  /* shared text bits */
+  .eyebrow{font:500 10.5px/1 var(--mono);letter-spacing:.32em;text-transform:uppercase;color:var(--fg-mute)}
+  .rule{height:1px;background:var(--rule);width:100%}
+  .accent{color:var(--accent)}
+  .small{font:400 11px/1.5 var(--mono);color:var(--fg-mute)}
+
+  /* shake & flicker keyframes used by puzzle */
+  @keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,1px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-2px,2px)}}
+  @keyframes flicker{0%,19%,21%,23%,80%,100%{opacity:1}20%,22%,24%{opacity:.5}}
+  @keyframes pulse-yellow{0%,100%{box-shadow:0 0 0 0 var(--accent-soft)}50%{box-shadow:0 0 0 10px transparent}}
+  @keyframes drift{0%{transform:translateY(0)}50%{transform:translateY(-4px)}100%{transform:translateY(0)}}
+  @keyframes typewriter{from{width:0}to{width:100%}}
+  @keyframes blinkCaret{50%{border-color:transparent}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+
+  /* Mobile responsive */
+  @media (max-width: 760px) {
+    body { font-size: 14px; }
+    .twk-panel { width: 240px !important; right: 8px !important; bottom: 8px !important; }
+    .game-grid { grid-template-columns: 1fr !important; grid-template-rows: 50vh 1fr !important; overflow: auto !important; }
+    .game-left { padding: 18px 18px !important; border-right: 0 !important; border-top: 1px solid var(--rule) !important; overflow: visible !important; order: 2; }
+    .game-right { order: 1; min-height: 50vh !important; flex-direction: column !important; }
+    .game-right-scene { min-height: 0 !important; flex: 1 !important; }
+    .artifact-panel { display: none !important; }
+    .mobile-evidence { display: block !important; }
+    .landing-pad { padding: 24px 20px !important; }
+    .landing-h1 { font-size: clamp(40px, 12vw, 64px) !important; white-space: normal !important; }
+    .landing-dots { gap: 14px !important; flex-wrap: wrap !important; }
+    .landing-dots button { padding: 6px !important; }
+    .landing-dot-label { font-size: 8.5px !important; letter-spacing: .2em !important; }
+    .landing-stats { gap: 18px !important; margin-top: 36px !important; flex-wrap: wrap !important; }
+    .landing-cta-row { flex-direction: column !important; }
+    .game-header { margin-bottom: 20px !important; }
+    .game-h1 { font-size: clamp(32px, 9vw, 48px) !important; }
+    .narrative-line-serif { font-size: 15.5px !important; }
+    .narrative-line-mono { font-size: 12px !important; }
+    .answer-row { flex-direction: column !important; }
+    .answer-row > button { width: 100% !important; }
+    .pageflip-spine { width: 96vw !important; height: 70vh !important; }
+    .artifact-panel { padding: 14px 18px !important; }
+    .artifact-letter { font-size: 14px !important; }
+    .artifact-key-numbers { font-size: 16px !important; letter-spacing: .25em !important; }
+    .artifact-matchbook-code { font-size: 15px !important; letter-spacing: .12em !important; }
+    .artifact-book-row { font-size: 12px !important; }
+    .progress-dots { flex-wrap: wrap !important; max-width: 60% !important; }
+  }
+  .mobile-evidence { display: none; }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+  <div class="vignette"></div>
+  <svg class="grain" xmlns="http://www.w3.org/2000/svg">
+    <filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0"/></filter>
+    <rect width="100%" height="100%" filter="url(#n)"/>
+  </svg>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="puzzles.jsx"></script>
+<script type="text/babel" src="puzzles-extra.jsx"></script>
+<script type="text/babel" src="scene3d.jsx"></script>
+<script type="text/babel" src="audio.jsx"></script>
+<script type="text/babel" src="landing.jsx"></script>
+<script type="text/babel" src="pageflip.jsx"></script>
+<script type="text/babel" src="interactive-puzzles.jsx"></script>
+<script type="text/babel" src="game.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+
+<script>
+  // Service worker registration. Skipped on file:// (where it can't run) and in
+  // any iframe-embed of the design tool so we don't shadow the host.
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http") && window.top === window.self) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch((err) => {
+        console.warn("[sw] registration failed", err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

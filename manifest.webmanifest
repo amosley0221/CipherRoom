@@ -1,0 +1,18 @@
+{
+  "name": "The Cipher Room",
+  "short_name": "Cipher",
+  "description": "A thriller-themed puzzle site — four tracks of cryptic chapters with 3D artifacts, ambient drones, and original mechanics.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0c1530",
+  "theme_color": "#0c1530",
+  "categories": ["games", "entertainment", "puzzles"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

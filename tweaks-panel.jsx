@@ -159,16 +159,32 @@ const __TWEAKS_STYLE = `
 // ── useTweaks ───────────────────────────────────────────────────────────────
 // Single source of truth for tweak values. setTweak persists via the host
 // (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
+// localStorage key for tweak persistence in standalone (deployed) mode.
+const TWEAKS_LS_KEY = 'cipherTweaks';
+
 function useTweaks(defaults) {
-  const [values, setValues] = React.useState(defaults);
+  // Hydrate from localStorage on first render so palette/sound/hints survive
+  // reloads in the deployed app. The design-tool host still drives values via
+  // postMessage; we just keep a local mirror for standalone use.
+  const [values, setValues] = React.useState(() => {
+    try {
+      const raw = localStorage.getItem(TWEAKS_LS_KEY);
+      if (raw) return { ...defaults, ...JSON.parse(raw) };
+    } catch (e) { /* ignore */ }
+    return defaults;
+  });
   // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
   // useState-style call doesn't write a "[object Object]" key into the persisted
   // JSON block.
   const setTweak = React.useCallback((keyOrEdits, val) => {
     const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
       ? keyOrEdits : { [keyOrEdits]: val };
-    setValues((prev) => ({ ...prev, ...edits }));
-    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+    setValues((prev) => {
+      const next = { ...prev, ...edits };
+      try { localStorage.setItem(TWEAKS_LS_KEY, JSON.stringify(next)); } catch (e) { /* ignore */ }
+      return next;
+    });
+    try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*'); } catch (e) { /* ignore */ }
     // Same-window signal so in-page listeners (deck-stage rail thumbnails)
     // can react — the parent message only reaches the host, not peers.
     window.dispatchEvent(new CustomEvent('tweakchange', { detail: edits }));

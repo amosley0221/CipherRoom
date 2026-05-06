@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0c1530"/>
+  <g transform="translate(256 256)">
+    <circle r="172" fill="none" stroke="#f7d44b" stroke-width="6" opacity="0.18"/>
+    <circle r="120" fill="none" stroke="#f7d44b" stroke-width="3" opacity="0.4"/>
+    <g font-family="Georgia, 'Instrument Serif', serif" font-style="italic" fill="#f7d44b" text-anchor="middle">
+      <text y="-14" font-size="180" font-weight="400">C</text>
+      <text y="86" font-size="32" letter-spacing="14" font-style="normal" font-family="ui-monospace, Menlo, monospace">CIPHER</text>
+    </g>
+  </g>
+</svg>
