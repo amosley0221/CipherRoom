@@ -36,9 +36,14 @@
   })();
 </script>
 
-<!-- iOS add-to-home-screen -->
+<!-- iOS add-to-home-screen.
+     status-bar-style "default" makes iOS reserve space above the page for
+     the status bar (instead of black-translucent which overlays it and
+     requires env(safe-area-inset-top), which is unreliable across iOS
+     versions in standalone PWAs). The bar inherits theme-color, which
+     applyPaletteVars keeps in sync with the active palette. -->
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Cipher" />
 <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
@@ -61,11 +66,10 @@
     color:var(--fg);
     transition:background .8s ease, color .8s ease;
     -webkit-font-smoothing:antialiased;
-    /* iOS PWA: pad for the status bar + home indicator and make the body a
-       positioning context so children with position:absolute/inset:0 land
-       inside the safe area instead of underneath the status bar. */
+    /* Position context so position:absolute/inset:0 children fill the body
+       box. Padding handles the home-indicator gutter on iOS PWAs. */
     position:relative;
-    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    padding:0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
   }
   :root{
     --bg:#0c1530;

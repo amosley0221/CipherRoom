@@ -145,7 +145,7 @@ function App() {
       {/* shared chrome */}
       <button onClick={() => setTweak('soundEnabled', !t.soundEnabled)} style={{
         position:"fixed",
-        top:"calc(env(safe-area-inset-top, 0px) + 14px)",
+        top:14,
         right:"calc(env(safe-area-inset-right, 0px) + 14px)",
         zIndex:50,
         width:40, height:40, borderRadius:"50%",
