@@ -7,6 +7,48 @@ const AudioFX = (() => {
   let masterGain = null;
   let droneNodes = null;
   let enabled = true;
+  let silentEl = null;
+  let unlocked = false;
+
+  // iOS standalone PWAs default the audio session to "ambient", which is
+  // silenced by the hardware mute switch and ignores the AudioContext. Playing
+  // any HTMLAudioElement on a user gesture promotes the session to "playback"
+  // for the rest of the page — after that, the WebAudio drone is audible at
+  // the phone's media volume. We use a tiny generated silent WAV so there's
+  // no asset dependency. Looping keeps the playback session alive even after
+  // the silent buffer ends.
+  function silentWavDataURL() {
+    const sr = 8000, ms = 250;
+    const samples = Math.floor(sr * ms / 1000);
+    const buf = new ArrayBuffer(44 + samples * 2);
+    const v = new DataView(buf);
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, "RIFF"); v.setUint32(4, 36 + samples * 2, true); w(8, "WAVE");
+    w(12, "fmt "); v.setUint32(16, 16, true);
+    v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    w(36, "data"); v.setUint32(40, samples * 2, true);
+    let bin = "";
+    const bytes = new Uint8Array(buf);
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return "data:audio/wav;base64," + btoa(bin);
+  }
+
+  function unlockSession() {
+    if (unlocked) return;
+    try {
+      silentEl = document.createElement("audio");
+      silentEl.setAttribute("playsinline", "");
+      silentEl.setAttribute("webkit-playsinline", "");
+      silentEl.loop = true;
+      silentEl.preload = "auto";
+      silentEl.src = silentWavDataURL();
+      const p = silentEl.play();
+      if (p && typeof p.catch === "function") p.catch(() => { /* will retry on next gesture */ });
+      unlocked = true;
+    } catch (e) { /* ignore */ }
+  }
 
   function ensure() {
     if (!ctx) {
@@ -16,6 +58,7 @@ const AudioFX = (() => {
       masterGain.connect(ctx.destination);
     }
     if (ctx.state === "suspended") ctx.resume();
+    unlockSession();
   }
 
   function setEnabled(on) {
@@ -173,7 +216,21 @@ const AudioFX = (() => {
     }, 1100);
   }
 
-  return { click, chime, fail, startDrone, stopDrone, setEnabled, ensure };
+  return { click, chime, fail, startDrone, stopDrone, setEnabled, ensure, unlockSession };
 })();
 
 window.AudioFX = AudioFX;
+
+// First-gesture unlock: hook every common interaction so the iOS audio
+// session is in "playback" mode by the time the user enters a chapter and
+// the drone starts. Each handler is one-shot.
+(function attachFirstGestureUnlock() {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  const events = ["pointerdown", "touchstart", "mousedown", "keydown"];
+  const fire = () => {
+    try { AudioFX.unlockSession(); } catch (e) {}
+    try { AudioFX.ensure(); } catch (e) {}
+    events.forEach((ev) => document.removeEventListener(ev, fire, true));
+  };
+  events.forEach((ev) => document.addEventListener(ev, fire, { capture: true, once: false }));
+})();
