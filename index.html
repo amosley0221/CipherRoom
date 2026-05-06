@@ -9,7 +9,32 @@
 <!-- PWA -->
 <link rel="manifest" href="/manifest.webmanifest" />
 <meta name="theme-color" content="#0c1530" />
-<meta name="color-scheme" content="dark" />
+<meta name="color-scheme" content="dark light" />
+
+<!-- Pre-paint: hydrate theme-color and the body bg from the saved palette
+     so iOS Safari's chrome and the first paint match the user's choice
+     before React mounts. iOS Safari only reads <meta name="theme-color">
+     during initial parse, so updating it after mount is too late. -->
+<script>
+  (function () {
+    var P = {
+      navy:   { bg:"#0c1530", fg:"#e9e6d6" },
+      black:  { bg:"#0a0a0a", fg:"#ece8d8" },
+      bone:   { bg:"#e8e2d0", fg:"#1a1a1a" },
+      forest: { bg:"#0d1812", fg:"#e6e0cb" }
+    };
+    try {
+      var raw = localStorage.getItem("cipherTweaks");
+      var key = raw ? (JSON.parse(raw).palette || "navy") : "navy";
+      var p = P[key] || P.navy;
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute("content", p.bg);
+      var s = document.createElement("style");
+      s.textContent = "html,body{background:" + p.bg + ";color:" + p.fg + "}";
+      document.head.appendChild(s);
+    } catch (e) { /* ignore */ }
+  })();
+</script>
 
 <!-- iOS add-to-home-screen -->
 <meta name="apple-mobile-web-app-capable" content="yes" />

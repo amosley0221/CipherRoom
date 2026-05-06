@@ -2,7 +2,7 @@
 // Strategy: cache-first for app shell + JSX modules, network-first for everything else
 // (so CDN React/Three updates aren't pinned by stale caches when online).
 
-const VERSION = "v1";
+const VERSION = "v2";
 const SHELL_CACHE = `cipher-shell-${VERSION}`;
 const RUNTIME_CACHE = `cipher-runtime-${VERSION}`;
 
