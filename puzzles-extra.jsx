@@ -128,6 +128,55 @@ const TRACK_BLACK = [
     answers: ["200"],
     normalize: (s) => s.replace(/[^0-9]/g,""),
     explain: "Each number's English name comes alphabetically next: TWO, TEN, TWELVE, SIXTEEN, SEVENTEEN, EIGHTEEN, NINETEEN, TWO HUNDRED. The next is 200."
+  },
+  {
+    id: 6, title: "The Two Guards", chapter: "VI", location: "End of the corridor",
+    scene: "guards",
+    body: [
+      "The corridor narrows. Two iron doors at the end. Two men in front of them, dressed identically — same coat, same gloves, same featureless brim of a hat.",
+      "Last entry in her notebook said you'd find them here. \"One always lies. The other never. You won't tell which is which by looking.\"",
+      "You get one yes-or-no question. To one guard.",
+      "You ask the man on the right: \"If I asked your colleague whether the LEFT door is the way out, would he say yes?\"",
+      "He nods. Yes."
+    ],
+    artifact: { kind: "door", slots: 2 },
+    prompt: "Which door do you take?",
+    inputLabel: "left or right",
+    placeholder: "left / right",
+    hints: [
+      "If the man you asked is the truth-teller, his answer reports what the liar would say — and the liar lies.",
+      "If the man you asked is the liar, his answer is the opposite of what the truth-teller would actually say.",
+      "Either way, his answer is the OPPOSITE of the truth. He said 'yes' for the left door — so left is wrong."
+    ],
+    answers: ["RIGHT"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Asking 'what would the OTHER say' inverts the truth no matter which guard you picked. His 'yes' for left means left is the trap. Take the right door."
+  },
+  {
+    id: 7, title: "The Three Envelopes", chapter: "VII", location: "Her desk, the morning after",
+    scene: "boxes",
+    body: [
+      "Three sealed envelopes on her desk. She'd labeled every one — and every label was wrong. On purpose. (You realize, with a kind of cold admiration, that she'd been preparing this for months.)",
+      "Inside each envelope: two photographs.",
+      "  · One envelope holds two SUSPECTS.",
+      "  · One holds two WITNESSES.",
+      "  · One holds one of each — SUSPECT and WITNESS.",
+      "Her labels read SS, WW, SW — and she swapped them all.",
+      "You may open ONE envelope, draw ONE photograph, and look. Then you have to identify all three.",
+      "Which one do you open?"
+    ],
+    artifact: { kind: "matchbook", code: "SW", sub: "the mislabeled mix" },
+    prompt: "Open the envelope labeled…",
+    inputLabel: "SS / WW / SW",
+    placeholder: "?",
+    hints: [
+      "Every label is wrong. So the envelope LABELED SW is not the mix — it's pure (either two suspects or two witnesses).",
+      "Open SW. Draw one photo. If it's a suspect, the envelope is actually SS. If a witness, it's WW.",
+      "Now the other two are labeled SS and WW. Each label is wrong, and neither is what we just identified — so the labeled WW is the SW mix, and the labeled SS is the WW pair."
+    ],
+    answers: ["SW","MIXED","MIX","S/W"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Every label is wrong, so SW must hide a pure pair. One photo from it gives you SS or WW, and the remaining two cascade because each label has to be wrong."
   }
 ];
 
@@ -261,6 +310,72 @@ const TRACK_BONE = [
     answers: ["SADIE"],
     normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
     explain: "S–A–D–I–E. She signed everything this way."
+  },
+  {
+    id: 6, title: "The Caesar", chapter: "VI", location: "Inside her copy of Suetonius",
+    scene: "caesar",
+    body: [
+      "She'd loved the Roman emperors — or at least their habits. Everyone borrowed her copy of Suetonius eventually.",
+      "Pencil, inside the back cover, in her looping hand:",
+      "  \"Three letters to the right. I always shift right.\"",
+      "  PHHW DW VHYHQ",
+      "It was dated the night before she disappeared. The day was Friday."
+    ],
+    artifact: { kind: "letter", lines: [
+      "PHHW  DW  VHYHQ",
+      "",
+      "(she shifted each letter)",
+      "(three places to the right)",
+      "",
+      "(reverse the shift)"
+    ]},
+    prompt: "Decode the message.",
+    inputLabel: "Two words",
+    placeholder: "?",
+    hints: [
+      "Caesar cipher. To encode she shifted each letter three places forward in the alphabet — to decode, shift each one three places back.",
+      "P → M. H → E. So PHHW becomes MEET.",
+      "DW → AT. VHYHQ → SEVEN. The whole message: MEET AT SEVEN."
+    ],
+    answers: ["MEET AT SEVEN","MEETATSEVEN"],
+    _solution: "MEET AT SEVEN",
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Caesar shift −3: P→M, H→E, W→T, D→A, V→S, Y→V, Q→N. PHHW DW VHYHQ → MEET AT SEVEN. She wanted to meet you somewhere, that Friday at seven."
+  },
+  {
+    id: 7, title: "The Lipogram", chapter: "VII", location: "Three pages from her last notebook",
+    scene: "lipogram",
+    body: [
+      "She'd left a notebook on the kitchen counter, open to three pages of clean prose. You read it twice before you noticed.",
+      "  \"A lazy moon hung low. Past it, a hush of sand. No bird, no sound — just a dry wind nudging dust along.",
+      "   I sat watching nothing for an hour, finding no thought worth catching.",
+      "   A patch of stars, all cold light. I cast no shadow.\"",
+      "Look closer. One letter — one of the most common in English — never appears. Not once.",
+      "Which letter did she avoid?"
+    ],
+    artifact: { kind: "letter", lines: [
+      "A lazy moon hung low.",
+      "Past it, a hush of sand.",
+      "No bird, no sound — just",
+      "a dry wind nudging dust along.",
+      "I sat watching nothing for an hour,",
+      "finding no thought worth catching.",
+      "A patch of stars, all cold light.",
+      "I cast no shadow.",
+      "",
+      "(one common letter never appears)"
+    ]},
+    prompt: "The missing letter.",
+    inputLabel: "One letter",
+    placeholder: "?",
+    hints: [
+      "It's a vowel.",
+      "It's the most common vowel — and the most common letter — in written English.",
+      "Sound the words out: lazy, moon, hung, hush, sand, bird, sound, dry, wind, dust… none of them have it."
+    ],
+    answers: ["E"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Eight lines without a single E — a deliberate lipogram. Named for Georges Perec's E-less novel La disparition."
   }
 ];
 
@@ -389,6 +504,54 @@ const TRACK_FOREST = [
     answers: ["30","THIRTY"],
     normalize: (s) => s.toUpperCase().replace(/[^A-Z0-9]/g,""),
     explain: "A 2×4 grid contains C(3,2)·C(5,2) = 3·10 = 30 rectangles."
+  },
+  {
+    id: 6, title: "The Crossroads", chapter: "VI", location: "Penciled inside an envelope flap",
+    scene: "crossroads",
+    body: [
+      "She'd drawn a 4×4 grid in the corner of an envelope — the streets between the train station and her flat. X at the station, in the top-left. ★ at her flat, in the bottom-right.",
+      "  X · · ·",
+      "  · · · ·",
+      "  · · · ·",
+      "  · · · ★",
+      "Below it, in her hand: \"I walk it every evening. Only east, only south. Never the same way twice.\"",
+      "How many different routes can take her home?"
+    ],
+    artifact: { kind: "key", numbers: ["3 E", "3 S", "?"] },
+    prompt: "Routes from X to ★.",
+    inputLabel: "A number",
+    placeholder: "?",
+    hints: [
+      "Three east moves and three south moves, taken in any order.",
+      "Choose 3 positions out of 6 total moves for the easts: that's the binomial coefficient C(6, 3).",
+      "C(6, 3) = 6! / (3! · 3!) = 20."
+    ],
+    answers: ["20","TWENTY"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z0-9]/g,""),
+    explain: "Six total moves (3 east + 3 south). Pick which 3 of the 6 are east: C(6,3) = 20 distinct routes."
+  },
+  {
+    id: 7, title: "The Bridges", chapter: "VII", location: "Postcard from Königsberg, in her shoebox",
+    scene: "bridges",
+    body: [
+      "Old postcard, pre-war. Königsberg, before the river redrew the city. Four landmasses, seven bridges across the Pregel.",
+      "On the back, in her hand:",
+      "  \"Cross every bridge exactly once. Start anywhere, end anywhere. Don't repeat a bridge.",
+      "   Yes or no?\"",
+      "She'd known you'd remember Euler. Or that you'd find him."
+    ],
+    artifact: { kind: "key", numbers: [4, 7] },
+    prompt: "Yes or no?",
+    inputLabel: "yes / no",
+    placeholder: "?",
+    hints: [
+      "Count the bridges meeting each landmass — that's its 'degree'.",
+      "In Königsberg the four landmasses have degrees 5, 3, 3, 3 — every one odd.",
+      "Euler proved it: a walk that crosses every edge exactly once requires AT MOST two vertices of odd degree. Four is too many."
+    ],
+    answers: ["NO"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Euler's theorem: an Eulerian path exists only if at most two vertices have odd degree. Königsberg has four odd-degree landmasses, so no such walk is possible."
   }
 ];
 

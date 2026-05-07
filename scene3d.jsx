@@ -649,6 +649,229 @@ function Scene3D({ kind, palette, opened, onReady }) {
       }
       mainObject = grp;
     }
+    else if (kind === "guards") {
+      // Two identical figures in front of two iron doors
+      for (let i = 0; i < 2; i++) {
+        const door = new THREE.Mesh(
+          new THREE.BoxGeometry(1.0, 2.0, 0.08),
+          makeMat(0x1a1a1a, { roughness:.6, metalness:.3 })
+        );
+        door.position.set(-1.1 + i * 2.2, 0, -0.6);
+        holder.add(door);
+        const handle = new THREE.Mesh(
+          new THREE.SphereGeometry(0.07, 12, 12),
+          makeMat(accent, { metalness:.9, roughness:.2 })
+        );
+        handle.position.set(-1.1 + i * 2.2 + 0.34, 0, -0.55);
+        holder.add(handle);
+        // Guard figure
+        const body = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.26, 0.34, 1.4, 10),
+          makeMat(0x2a2418, { roughness:.85 })
+        );
+        body.position.set(-1.1 + i * 2.2, -0.2, 0.2);
+        holder.add(body);
+        const head = new THREE.Mesh(
+          new THREE.SphereGeometry(0.26, 20, 20),
+          makeMat(0x3a3024, { roughness:.7 })
+        );
+        head.position.set(-1.1 + i * 2.2, 0.78, 0.2);
+        holder.add(head);
+        // Featureless face — a single accent line for the brim
+        const brim = new THREE.Mesh(
+          new THREE.TorusGeometry(0.28, 0.025, 8, 24),
+          makeMat(accent, { metalness:.6 })
+        );
+        brim.rotation.x = Math.PI / 2;
+        brim.position.set(-1.1 + i * 2.2, 1.0, 0.2);
+        holder.add(brim);
+      }
+      mainObject = holder;
+    }
+    else if (kind === "boxes") {
+      // Three sealed envelopes propped on a desk edge — each with a wax seal
+      const labels = ["SS", "WW", "SW"];
+      for (let i = 0; i < 3; i++) {
+        const env = new THREE.Mesh(
+          new THREE.BoxGeometry(1.3, 0.85, 0.06),
+          makeMat(0xeae0c4, { roughness:.92 })
+        );
+        env.position.set(-1.5 + i * 1.5, 0, 0);
+        env.rotation.z = (i - 1) * 0.04;
+        env.rotation.x = -0.25;
+        holder.add(env);
+        // wax seal
+        const seal = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.12, 0.12, 0.04, 24),
+          makeMat(accent, { roughness:.5, metalness:.2 })
+        );
+        seal.rotation.x = Math.PI / 2;
+        seal.position.set(-1.5 + i * 1.5, 0, 0.05);
+        holder.add(seal);
+        // pencil-mark label as a tiny dark bar
+        const labelBar = new THREE.Mesh(
+          new THREE.BoxGeometry(0.34, 0.06, 0.005),
+          makeMat(0x1a1a1a, { roughness:.9 })
+        );
+        labelBar.position.set(-1.5 + i * 1.5, 0.28, 0.04);
+        holder.add(labelBar);
+      }
+      mainObject = holder;
+    }
+    else if (kind === "caesar") {
+      // Roman scroll — tan cylinder with banded letter-blocks
+      const scroll = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.7, 0.7, 3.2, 32, 1, true),
+        makeMat(0xd9c89a, { roughness:.95, side: THREE.DoubleSide })
+      );
+      scroll.rotation.z = Math.PI / 2;
+      holder.add(scroll);
+      // End caps as darker rolls
+      for (let i = 0; i < 2; i++) {
+        const cap = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.78, 0.78, 0.18, 32),
+          makeMat(0x3a2a18, { roughness:.85 })
+        );
+        cap.rotation.z = Math.PI / 2;
+        cap.position.x = (i === 0 ? -1.6 : 1.6);
+        holder.add(cap);
+      }
+      // Three glyph blocks across the scroll face — encoded letters
+      for (let i = 0; i < 3; i++) {
+        const glyph = new THREE.Mesh(
+          new THREE.BoxGeometry(0.5, 0.04, 0.34),
+          makeMat(accent, { metalness:.6, roughness:.4 })
+        );
+        glyph.position.set(-1.0 + i * 1.0, 0.72, 0);
+        holder.add(glyph);
+      }
+      mainObject = scroll;
+    }
+    else if (kind === "lipogram") {
+      // A page of text with one missing letterform conspicuously absent
+      const page = new THREE.Mesh(
+        new THREE.BoxGeometry(2.4, 3.0, 0.04),
+        makeMat(0xf5ecd0, { roughness:.95 })
+      );
+      page.rotation.x = -0.15;
+      holder.add(page);
+      // Lines of text as small dark bars, with one full row missing in the middle
+      for (let r = 0; r < 9; r++) {
+        if (r === 4) continue; // the missing letter row
+        const line = new THREE.Mesh(
+          new THREE.BoxGeometry(2.0, 0.06, 0.005),
+          makeMat(0x1a1a1a, { roughness:.9 })
+        );
+        line.position.set(0, 1.2 - r * 0.3, 0.025);
+        line.rotation.x = -0.15;
+        holder.add(line);
+      }
+      // A single accent-colored "absence marker" — a circle where the missing letter would be
+      const absence = new THREE.Mesh(
+        new THREE.RingGeometry(0.14, 0.18, 24),
+        makeMat(accent, { side: THREE.DoubleSide })
+      );
+      absence.position.set(0, 0, 0.035);
+      absence.rotation.x = -0.15;
+      holder.add(absence);
+      mainObject = page;
+    }
+    else if (kind === "crossroads") {
+      // 4×4 grid of city blocks with two corner markers
+      const tileSize = 0.4;
+      const gap = 0.08;
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const tile = new THREE.Mesh(
+            new THREE.BoxGeometry(tileSize, 0.06, tileSize),
+            makeMat(0x2a2418, { roughness:.85 })
+          );
+          tile.position.set(
+            -0.72 + c * (tileSize + gap),
+            0,
+            0.72 - r * (tileSize + gap)
+          );
+          holder.add(tile);
+        }
+      }
+      // X marker (top-left) — accent cylinder
+      const xMarker = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.12, 0.12, 0.18, 16),
+        makeMat(accent, { metalness:.7, emissive: accent, emissiveIntensity:.3 })
+      );
+      xMarker.position.set(-0.72, 0.12, 0.72);
+      holder.add(xMarker);
+      // Star marker (bottom-right) — small octahedron
+      const star = new THREE.Mesh(
+        new THREE.OctahedronGeometry(0.16, 0),
+        makeMat(accent, { metalness:.8, emissive: accent, emissiveIntensity:.4 })
+      );
+      star.position.set(0.72, 0.16, -0.72);
+      holder.add(star);
+      holder.rotation.x = -0.5;
+      mainObject = holder;
+    }
+    else if (kind === "bridges") {
+      // Königsberg: 4 landmasses + 7 bridges between them
+      // Layout (y=0 plane):
+      //   north bank (N) — top
+      //   south bank (S) — bottom
+      //   island A    — center-left
+      //   island B    — center-right (downstream)
+      const masses = [
+        { name: "N", x: 0,   z: -1.4, r: 0.55 },
+        { name: "S", x: 0,   z:  1.4, r: 0.55 },
+        { name: "A", x: -0.9, z: 0,    r: 0.45 },
+        { name: "B", x:  0.9, z: 0,    r: 0.45 },
+      ];
+      masses.forEach((m) => {
+        const land = new THREE.Mesh(
+          new THREE.CylinderGeometry(m.r, m.r * 1.05, 0.18, 24),
+          makeMat(0x2f3a24, { roughness:.95 })
+        );
+        land.position.set(m.x, 0, m.z);
+        holder.add(land);
+      });
+      // The seven bridges (N-A x2, S-A x2, N-B, S-B, A-B)
+      const bridges = [
+        ["N", "A", -0.15], ["N", "A", 0.15],
+        ["S", "A", -0.15], ["S", "A", 0.15],
+        ["N", "B", 0],
+        ["S", "B", 0],
+        ["A", "B", 0],
+      ];
+      const get = (n) => masses.find((m) => m.name === n);
+      bridges.forEach(([from, to, lateralOffset]) => {
+        const a = get(from), b = get(to);
+        const dx = b.x - a.x, dz = b.z - a.z;
+        const len = Math.hypot(dx, dz);
+        const angle = Math.atan2(dz, dx);
+        const span = new THREE.Mesh(
+          new THREE.BoxGeometry(len, 0.04, 0.10),
+          makeMat(accent, { metalness:.5, roughness:.4 })
+        );
+        const ox = -Math.sin(angle) * lateralOffset;
+        const oz =  Math.cos(angle) * lateralOffset;
+        span.position.set((a.x + b.x) / 2 + ox, 0.08, (a.z + b.z) / 2 + oz);
+        span.rotation.y = -angle;
+        holder.add(span);
+      });
+      // The river — two thin dark bands behind the masses
+      const river1 = new THREE.Mesh(
+        new THREE.BoxGeometry(3.6, 0.01, 0.45),
+        makeMat(0x101820, { roughness:.4 })
+      );
+      river1.position.set(0, -0.05, -0.55);
+      holder.add(river1);
+      const river2 = new THREE.Mesh(
+        new THREE.BoxGeometry(3.6, 0.01, 0.45),
+        makeMat(0x101820, { roughness:.4 })
+      );
+      river2.position.set(0, -0.05, 0.55);
+      holder.add(river2);
+      holder.rotation.x = -0.55;
+      mainObject = holder;
+    }
 
     stateRef.current.mainObject = mainObject;
     stateRef.current.holder = holder;
