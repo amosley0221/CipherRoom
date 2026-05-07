@@ -811,6 +811,486 @@ function Scene3D({ kind, palette, opened, onReady }) {
       holder.rotation.x = -0.5;
       mainObject = holder;
     }
+    else if (kind === "lobby") {
+      // Hotel lobby — reception desk + scattered figures
+      const desk = new THREE.Mesh(
+        new THREE.BoxGeometry(2.4, 0.5, 0.7),
+        makeMat(0x3a2a18, { roughness:.7 })
+      );
+      desk.position.set(0, -0.4, -1.2);
+      holder.add(desk);
+      // Scattered figures (different colors to feel like a crowd)
+      const colors = [0xb33027, 0x4a4a4a, 0xddd6c4, 0xb33027, 0x6a4a2a, 0xb33027, 0x4a4a4a];
+      const positions = [
+        [-1.8, -0.2, 0.5], [-0.7, -0.2, -0.7], [0.2, -0.2, -0.4],
+        [1.2, -0.2, 0.6], [-1.4, -0.2, 1.3], [-0.4, -0.2, 1.1], [1.6, -0.2, -0.5]
+      ];
+      for (let i = 0; i < positions.length; i++) {
+        const body = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.15, 0.18, 0.7, 8),
+          makeMat(colors[i], { roughness:.85 })
+        );
+        body.position.set(...positions[i]);
+        holder.add(body);
+        const head = new THREE.Mesh(
+          new THREE.SphereGeometry(0.15, 14, 14),
+          makeMat(0xddd0a0, { roughness:.7 })
+        );
+        head.position.set(positions[i][0], positions[i][1] + 0.5, positions[i][2]);
+        holder.add(head);
+      }
+      // pendant lamp
+      const lamp = new THREE.Mesh(
+        new THREE.SphereGeometry(0.18, 16, 16),
+        makeMat(accent, { emissive: accent, emissiveIntensity:.8 })
+      );
+      lamp.position.set(0, 1.2, 0);
+      holder.add(lamp);
+      mainObject = holder;
+    }
+    else if (kind === "receipt") {
+      // A long thin printed receipt curling slightly
+      const paperColor = 0xefe7d2;
+      for (let i = 0; i < 7; i++) {
+        const slip = new THREE.Mesh(
+          new THREE.BoxGeometry(1.4, 0.16, 0.02),
+          makeMat(paperColor, { roughness:.95 })
+        );
+        slip.position.set(0, 1.0 - i * 0.22, 0);
+        slip.rotation.x = (i - 3) * 0.04;
+        holder.add(slip);
+        // line item bar
+        const line = new THREE.Mesh(
+          new THREE.BoxGeometry(1.05, 0.04, 0.005),
+          makeMat(0x1a1a1a, { roughness:.9 })
+        );
+        line.position.set(-0.1, 1.0 - i * 0.22, 0.011);
+        line.rotation.x = (i - 3) * 0.04;
+        holder.add(line);
+        // price box
+        const price = new THREE.Mesh(
+          new THREE.BoxGeometry(0.22, 0.04, 0.005),
+          makeMat(accent, { roughness:.5 })
+        );
+        price.position.set(0.55, 1.0 - i * 0.22, 0.012);
+        price.rotation.x = (i - 3) * 0.04;
+        holder.add(price);
+      }
+      mainObject = holder;
+    }
+    else if (kind === "lineup") {
+      // Five suspects against a height chart
+      const wall = new THREE.Mesh(
+        new THREE.BoxGeometry(4.2, 2.4, 0.06),
+        makeMat(0x2a2418, { roughness:.95 })
+      );
+      wall.position.set(0, 0, -0.6);
+      holder.add(wall);
+      // height-chart bars
+      for (let i = 0; i < 7; i++) {
+        const bar = new THREE.Mesh(
+          new THREE.BoxGeometry(4.0, 0.012, 0.005),
+          makeMat(accent, { roughness:.5 })
+        );
+        bar.position.set(0, -1.1 + i * 0.32, -0.55);
+        holder.add(bar);
+      }
+      // five figures
+      for (let i = 0; i < 5; i++) {
+        const body = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.22, 0.28, 1.4, 10),
+          makeMat(i === 3 ? accent : 0x3a3024, { roughness:.85 })
+        );
+        body.position.set(-1.6 + i * 0.8, -0.2, 0.1);
+        holder.add(body);
+        const head = new THREE.Mesh(
+          new THREE.SphereGeometry(0.22, 18, 18),
+          makeMat(i === 3 ? accent : 0x4a4030, { roughness:.7 })
+        );
+        head.position.set(-1.6 + i * 0.8, 0.7, 0.1);
+        holder.add(head);
+      }
+      mainObject = holder;
+    }
+    else if (kind === "plate") {
+      // License plate — a flat rectangle with raised character blocks
+      const plate = new THREE.Mesh(
+        new THREE.BoxGeometry(2.6, 0.9, 0.06),
+        makeMat(0xddd6c4, { roughness:.7, metalness:.3 })
+      );
+      holder.add(plate);
+      // border
+      const border = new THREE.Mesh(
+        new THREE.BoxGeometry(2.66, 0.94, 0.04),
+        makeMat(accent, { metalness:.7, roughness:.3 })
+      );
+      border.position.z = -0.02;
+      holder.add(border);
+      // 6 character slots — known letters/digits as solid blocks, missing as outlined frames
+      const slots = [true, false, true, true, true, false]; // false = missing (the two ?'s)
+      for (let i = 0; i < 6; i++) {
+        const x = -1.05 + i * 0.42;
+        if (slots[i]) {
+          const c = new THREE.Mesh(
+            new THREE.BoxGeometry(0.32, 0.6, 0.04),
+            makeMat(0x1a1a1a, { roughness:.6 })
+          );
+          c.position.set(x, 0, 0.05);
+          holder.add(c);
+        } else {
+          // hollow accent ring
+          const ring = new THREE.Mesh(
+            new THREE.RingGeometry(0.18, 0.22, 4),
+            makeMat(accent, { side: THREE.DoubleSide })
+          );
+          ring.position.set(x, 0, 0.05);
+          ring.rotation.z = Math.PI / 4;
+          holder.add(ring);
+        }
+      }
+      mainObject = plate;
+    }
+    else if (kind === "snapshot") {
+      // Polaroid frame floating, with desk items rendered as small blocks inside
+      const frame = new THREE.Mesh(
+        new THREE.BoxGeometry(2.4, 2.8, 0.06),
+        makeMat(0xefe7d2, { roughness:.95 })
+      );
+      holder.add(frame);
+      const photo = new THREE.Mesh(
+        new THREE.BoxGeometry(2.0, 2.0, 0.04),
+        makeMat(0x1a1a1d, { roughness:.5 })
+      );
+      photo.position.set(0, 0.2, 0.04);
+      holder.add(photo);
+      // Inside-photo: typewriter base
+      const tw = new THREE.Mesh(
+        new THREE.BoxGeometry(0.7, 0.2, 0.4),
+        makeMat(0x4a4030, { roughness:.7 })
+      );
+      tw.position.set(-0.35, -0.3, 0.07);
+      holder.add(tw);
+      // Mug
+      const mug = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.12, 0.12, 0.18, 16),
+        makeMat(0xddd0a0, { roughness:.6 })
+      );
+      mug.position.set(0.4, -0.2, 0.07);
+      holder.add(mug);
+      // Mantel clock — a small disc at top
+      const clock = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.22, 0.22, 0.05, 24),
+        makeMat(accent, { metalness:.8, roughness:.2 })
+      );
+      clock.rotation.x = Math.PI / 2;
+      clock.position.set(0.5, 0.7, 0.07);
+      holder.add(clock);
+      // hour hand (small)
+      const hour = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.13, 0.01), makeMat(0x111));
+      hour.geometry.translate(0, 0.065, 0);
+      hour.position.set(0.5, 0.7, 0.1);
+      hour.rotation.z = -0.1;
+      holder.add(hour);
+      // minute hand (longer, points to 9 = -90deg from 12)
+      const minH = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.18, 0.01), makeMat(0x111));
+      minH.geometry.translate(0, 0.09, 0);
+      minH.position.set(0.5, 0.7, 0.11);
+      minH.rotation.z = -Math.PI / 2;
+      holder.add(minH);
+      mainObject = frame;
+    }
+    else if (kind === "composite") {
+      // Layered face composite — overlapping translucent panels
+      for (let i = 0; i < 5; i++) {
+        const slice = new THREE.Mesh(
+          new THREE.BoxGeometry(1.6, 0.5, 0.04),
+          makeMat(i === 2 ? accent : 0xddd0a0, {
+            roughness:.7,
+            transparent: true,
+            opacity: 0.55 + i * 0.08
+          })
+        );
+        slice.position.set((i - 2) * 0.05, 0.8 - i * 0.45, i * 0.04);
+        slice.rotation.z = (i - 2) * 0.04;
+        holder.add(slice);
+      }
+      // outline frame
+      const frame = new THREE.Mesh(
+        new THREE.BoxGeometry(1.9, 2.6, 0.02),
+        makeMat(accent, { metalness:.5 })
+      );
+      frame.position.z = -0.04;
+      holder.add(frame);
+      mainObject = holder;
+    }
+    else if (kind === "atbash") {
+      // Two concentric letter wheels — outer normal, inner reversed
+      const outer = new THREE.Mesh(
+        new THREE.TorusGeometry(1.4, 0.08, 16, 64),
+        makeMat(0xddd0a0, { metalness:.3, roughness:.6 })
+      );
+      holder.add(outer);
+      const inner = new THREE.Mesh(
+        new THREE.TorusGeometry(1.0, 0.08, 16, 48),
+        makeMat(accent, { metalness:.7, roughness:.3 })
+      );
+      holder.add(inner);
+      // tick marks around outer ring
+      for (let i = 0; i < 26; i++) {
+        const a = (i / 26) * Math.PI * 2;
+        const tick = new THREE.Mesh(
+          new THREE.BoxGeometry(0.04, 0.18, 0.04),
+          makeMat(0x1a1a1a)
+        );
+        tick.position.set(Math.cos(a) * 1.4, Math.sin(a) * 1.4, 0);
+        tick.rotation.z = a + Math.PI / 2;
+        holder.add(tick);
+      }
+      // tick marks around inner ring (reversed)
+      for (let i = 0; i < 26; i++) {
+        const a = -(i / 26) * Math.PI * 2 + Math.PI;
+        const tick = new THREE.Mesh(
+          new THREE.BoxGeometry(0.03, 0.14, 0.03),
+          makeMat(accent)
+        );
+        tick.position.set(Math.cos(a) * 1.0, Math.sin(a) * 1.0, 0);
+        tick.rotation.z = a + Math.PI / 2;
+        holder.add(tick);
+      }
+      mainObject = outer;
+    }
+    else if (kind === "polybius") {
+      // 5x5 grid of slate squares with row/col markers
+      const cell = 0.36;
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const sq = new THREE.Mesh(
+            new THREE.BoxGeometry(cell * 0.9, 0.08, cell * 0.9),
+            makeMat((r + c) % 2 === 0 ? 0xddd0a0 : 0x3a2a18, { roughness:.7 })
+          );
+          sq.position.set(-0.8 + c * cell, 0, 0.8 - r * cell);
+          holder.add(sq);
+        }
+      }
+      // accent edge bars (row and column index strips)
+      for (let i = 0; i < 5; i++) {
+        const rowMark = new THREE.Mesh(
+          new THREE.BoxGeometry(0.1, 0.1, cell * 0.6),
+          makeMat(accent, { metalness:.6 })
+        );
+        rowMark.position.set(-1.1, 0.05, 0.8 - i * cell);
+        holder.add(rowMark);
+        const colMark = new THREE.Mesh(
+          new THREE.BoxGeometry(cell * 0.6, 0.1, 0.1),
+          makeMat(accent, { metalness:.6 })
+        );
+        colMark.position.set(-0.8 + i * cell, 0.05, 1.1);
+        holder.add(colMark);
+      }
+      holder.rotation.x = -0.4;
+      mainObject = holder;
+    }
+    else if (kind === "morse") {
+      // Telegraph key on a wood base, with dot/dash bars floating above
+      const base = new THREE.Mesh(
+        new THREE.BoxGeometry(1.6, 0.18, 0.9),
+        makeMat(0x3a2a18, { roughness:.85 })
+      );
+      base.position.y = -0.4;
+      holder.add(base);
+      const lever = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 0.06, 0.12),
+        makeMat(accent, { metalness:.8, roughness:.2 })
+      );
+      lever.position.set(0.1, -0.18, 0);
+      lever.rotation.z = -0.08;
+      holder.add(lever);
+      const knob = new THREE.Mesh(
+        new THREE.SphereGeometry(0.13, 16, 16),
+        makeMat(0x1a1a1a, { roughness:.4 })
+      );
+      knob.position.set(0.6, -0.05, 0);
+      holder.add(knob);
+      // floating dot/dash sequence
+      const seq = [1,1,1, 0,1,0,1, 1,0, 1,0,1, 1,0,1,1, 1, 0]; // 1=dot 0=dash (S C A R L E T-ish)
+      for (let i = 0; i < seq.length; i++) {
+        const sym = new THREE.Mesh(
+          seq[i] === 1
+            ? new THREE.SphereGeometry(0.06, 12, 12)
+            : new THREE.BoxGeometry(0.22, 0.05, 0.05),
+          makeMat(accent, { emissive: accent, emissiveIntensity:.4 })
+        );
+        sym.position.set(-1.3 + (i * 0.18), 0.7, 0);
+        holder.add(sym);
+      }
+      mainObject = base;
+    }
+    else if (kind === "vigenere") {
+      // Two stacked cipher disks — outer ring, inner ring offset
+      const outerRing = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.4, 1.4, 0.1, 64, 1, true),
+        makeMat(0xddd0a0, { roughness:.6, side: THREE.DoubleSide })
+      );
+      outerRing.rotation.x = Math.PI / 2;
+      holder.add(outerRing);
+      const innerDisk = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.05, 1.05, 0.16, 48),
+        makeMat(accent, { metalness:.6, roughness:.3 })
+      );
+      innerDisk.rotation.x = Math.PI / 2;
+      innerDisk.position.z = 0.04;
+      holder.add(innerDisk);
+      const center = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.22, 0.22, 0.22, 24),
+        makeMat(0x3a2a18, { roughness:.6 })
+      );
+      center.rotation.x = Math.PI / 2;
+      holder.add(center);
+      // outer letter ticks
+      for (let i = 0; i < 26; i++) {
+        const a = (i / 26) * Math.PI * 2;
+        const tick = new THREE.Mesh(
+          new THREE.BoxGeometry(0.05, 0.05, 0.16),
+          makeMat(0x1a1a1a)
+        );
+        tick.position.set(Math.cos(a) * 1.3, Math.sin(a) * 1.3, 0);
+        holder.add(tick);
+      }
+      // inner letter ticks (rotated)
+      for (let i = 0; i < 26; i++) {
+        const a = (i / 26) * Math.PI * 2 + 0.5;
+        const tick = new THREE.Mesh(
+          new THREE.BoxGeometry(0.04, 0.04, 0.18),
+          makeMat(0x1a1a1a)
+        );
+        tick.position.set(Math.cos(a) * 0.92, Math.sin(a) * 0.92, 0.04);
+        holder.add(tick);
+      }
+      mainObject = outerRing;
+    }
+    else if (kind === "railfence") {
+      // Three rails — three horizontal bars with zig-zag connectors
+      for (let r = 0; r < 3; r++) {
+        const rail = new THREE.Mesh(
+          new THREE.BoxGeometry(3.6, 0.05, 0.05),
+          makeMat(accent, { metalness:.7, roughness:.3 })
+        );
+        rail.position.y = 0.7 - r * 0.7;
+        holder.add(rail);
+      }
+      // zigzag connectors (13 segments)
+      for (let i = 0; i < 13; i++) {
+        const cycle = i % 4;
+        const yFromRow = cycle === 0 ? 0 : cycle === 1 ? 1 : cycle === 2 ? 2 : 1;
+        const yToRow   = ((i + 1) % 4 === 0) ? 0
+          : ((i + 1) % 4 === 1) ? 1
+          : ((i + 1) % 4 === 2) ? 2 : 1;
+        const xFrom = -1.7 + i * 0.28;
+        const xTo   = -1.7 + (i + 1) * 0.28;
+        const yFrom = 0.7 - yFromRow * 0.7;
+        const yTo   = 0.7 - yToRow * 0.7;
+        const dx = xTo - xFrom, dy = yTo - yFrom;
+        const len = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx);
+        const seg = new THREE.Mesh(
+          new THREE.BoxGeometry(len, 0.025, 0.025),
+          makeMat(0xddd0a0, { roughness:.6 })
+        );
+        seg.position.set((xFrom + xTo) / 2, (yFrom + yTo) / 2, 0);
+        seg.rotation.z = angle;
+        holder.add(seg);
+      }
+      // little dots at vertices
+      for (let i = 0; i < 13; i++) {
+        const cycle = i % 4;
+        const yRow = cycle === 0 ? 0 : cycle === 1 ? 1 : cycle === 2 ? 2 : 1;
+        const dot = new THREE.Mesh(
+          new THREE.SphereGeometry(0.06, 12, 12),
+          makeMat(accent, { emissive: accent, emissiveIntensity:.3 })
+        );
+        dot.position.set(-1.7 + i * 0.28, 0.7 - yRow * 0.7, 0.05);
+        holder.add(dot);
+      }
+      mainObject = holder;
+    }
+    else if (kind === "bookcipher") {
+      // Open book with ribbon marker and indexed lines
+      const left = new THREE.Mesh(
+        new THREE.BoxGeometry(1.4, 0.05, 1.8),
+        makeMat(0xefe7d2, { roughness:.95 })
+      );
+      left.position.set(-0.71, 0, 0);
+      left.rotation.z = -0.06;
+      holder.add(left);
+      const right = new THREE.Mesh(
+        new THREE.BoxGeometry(1.4, 0.05, 1.8),
+        makeMat(0xefe7d2, { roughness:.95 })
+      );
+      right.position.set(0.71, 0, 0);
+      right.rotation.z = 0.06;
+      holder.add(right);
+      // spine
+      const spine = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, 0.15, 1.85),
+        makeMat(0x3a2a18, { roughness:.7 })
+      );
+      holder.add(spine);
+      // text lines on left page
+      for (let i = 0; i < 5; i++) {
+        const line = new THREE.Mesh(
+          new THREE.BoxGeometry(1.1, 0.03, 0.005),
+          makeMat(0x1a1a1a, { roughness:.9 })
+        );
+        line.position.set(-0.71, 0.04, -0.6 + i * 0.3);
+        line.rotation.z = -0.06;
+        holder.add(line);
+      }
+      // ribbon marker
+      const ribbon = new THREE.Mesh(
+        new THREE.BoxGeometry(0.06, 0.02, 1.0),
+        makeMat(accent, { roughness:.4 })
+      );
+      ribbon.position.set(0, 0.06, 0.5);
+      holder.add(ribbon);
+      holder.rotation.x = -0.45;
+      mainObject = holder;
+    }
+    else if (kind === "onetimepad") {
+      // Punched paper tape — long ribbon with holes
+      const tape = new THREE.Mesh(
+        new THREE.BoxGeometry(4.2, 0.04, 0.7),
+        makeMat(0xddd0a0, { roughness:.85 })
+      );
+      holder.add(tape);
+      // sprocket holes (top edge) and data holes (random)
+      for (let i = 0; i < 14; i++) {
+        const sprocket = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.04, 0.04, 0.06, 12),
+          makeMat(0x000)
+        );
+        sprocket.position.set(-2.0 + i * 0.3, 0.05, 0.28);
+        holder.add(sprocket);
+        // a data hole pattern (varies per column)
+        for (let row = 0; row < 4; row++) {
+          if ((i * 7 + row * 3) % 5 < 2) {
+            const dot = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.05, 0.05, 0.06, 12),
+              makeMat(0x000)
+            );
+            dot.position.set(-2.0 + i * 0.3, 0.05, 0.1 - row * 0.12);
+            holder.add(dot);
+          }
+        }
+      }
+      // accent strip running across (where pad aligns to cipher)
+      const align = new THREE.Mesh(
+        new THREE.BoxGeometry(4.2, 0.01, 0.05),
+        makeMat(accent, { emissive: accent, emissiveIntensity:.5 })
+      );
+      align.position.set(0, 0.025, -0.18);
+      holder.add(align);
+      mainObject = tape;
+    }
     else if (kind === "bridges") {
       // Königsberg: 4 landmasses + 7 bridges between them
       // Layout (y=0 plane):

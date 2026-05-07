@@ -38,6 +38,20 @@ const PALETTES = {
     fg: "#e6e0cb", fgMute: "rgba(230,224,203,.55)", fgFaint: "rgba(230,224,203,.28)",
     accent: "#d49a4a", accentSoft: "rgba(212,154,74,.16)",
     rule: "rgba(230,224,203,.1)", paper:"#e6dcc0", ink:"#0d1812"
+  },
+  charcoal: {
+    name: "Charcoal / Amber",
+    bg: "#1a1a1d", bgSoft: "#23232a", bgPaper: "#2c2d34",
+    fg: "#ddd6c4", fgMute: "rgba(221,214,196,.55)", fgFaint: "rgba(221,214,196,.28)",
+    accent: "#ffa033", accentSoft: "rgba(255,160,51,.18)",
+    rule: "rgba(221,214,196,.12)", paper:"#ddd6c4", ink:"#1a1a1d"
+  },
+  oxblood: {
+    name: "Oxblood / Ivory",
+    bg: "#241012", bgSoft: "#2e1417", bgPaper: "#39181c",
+    fg: "#f0e7d0", fgMute: "rgba(240,231,208,.55)", fgFaint: "rgba(240,231,208,.28)",
+    accent: "#e8c987", accentSoft: "rgba(232,201,135,.18)",
+    rule: "rgba(240,231,208,.12)", paper:"#f0e7d0", ink:"#241012"
   }
 };
 
@@ -162,7 +176,7 @@ function App() {
         <TweakRadio
           label=""
           value={t.palette}
-          options={["navy","black","bone","forest"]}
+          options={["navy","black","bone","forest","charcoal","oxblood"]}
           onChange={(v) => setTweak('palette', v)}
         />
         <TweakSection label="Experience"/>

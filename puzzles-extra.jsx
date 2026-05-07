@@ -555,11 +555,419 @@ const TRACK_FOREST = [
   }
 ];
 
+const TRACK_CHARCOAL = [
+  {
+    id: 1, title: "The Lobby", chapter: "I", location: "Hotel Lethe, security log",
+    scene: "lobby",
+    body: [
+      "Officer Reyes had thirty seconds of footage and a witness with stage fright. She wrote down what she saw — exactly what she saw, in order.",
+      "  \"The lobby of the Hotel Lethe, 8:47 p.m.",
+      "  At the front desk, a tall woman in a red trench coat. The porter behind her in grey. The pianist plays in the corner, in black.",
+      "  By the elevator, twin girls in matching red scarves fight over a magazine; a man in a brown overcoat ignores them.",
+      "  The bellhop, in plum, pushes a cart toward the bar. The bartender wears a black vest over a white shirt — and a red bow tie.\"",
+      "Reyes asked you a single question.",
+      "How many people wore red?"
+    ],
+    artifact: { kind: "matchbook", code: "RED COUNT", sub: "Hotel Lethe, 8:47 p.m." },
+    prompt: "How many wore red?",
+    inputLabel: "A number",
+    placeholder: "?",
+    hints: [
+      "Read each garment in order. Skip plum. Skip burgundy. Count only red.",
+      "Red trench: 1. Red scarves on twins: +2. Red bow tie: +1. Plum and brown don't count.",
+      "Four people."
+    ],
+    answers: ["4","FOUR"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z0-9]/g,""),
+    explain: "Woman in red trench (1), twin sisters in red scarves (2), bartender in red bow tie (1) — four. Plum, brown, grey, black, white don't count."
+  },
+  {
+    id: 2, title: "The Receipt", chapter: "II", location: "Bistro La Voile, table 4",
+    scene: "receipt",
+    body: [
+      "He swears he ordered only what's on the receipt. The receipt disagrees by exactly one item.",
+      "Bistro La Voile, table 4, 9:14 p.m. — found in his pocket, crumpled.",
+      "  · Coffee — 4.50",
+      "  · Croissant — 3.20",
+      "  · Tarte aux pommes — 6.80",
+      "  · House red, glass — 7.50",
+      "  · Soupe du jour — 9.00",
+      "Total printed at the bottom: 36.00",
+      "The bistro's full menu also lists: Espresso 3.50, Eau gazeuse 5.00, Salade niçoise 12.00, Pain au chocolat 4.00.",
+      "What did he have that he forgot to mention?"
+    ],
+    artifact: { kind: "letter", lines: [
+      "BISTRO LA VOILE",
+      "table 4 · 9:14 pm",
+      "",
+      "coffee . . . . . . 4.50",
+      "croissant . . . . 3.20",
+      "tarte . . . . . . . 6.80",
+      "house red . . . . 7.50",
+      "soupe . . . . . . 9.00",
+      "",
+      "TOTAL  . . . . . 36.00"
+    ]},
+    prompt: "The missing item.",
+    inputLabel: "Menu item",
+    placeholder: "?",
+    hints: [
+      "Add up the printed line items first.",
+      "4.50 + 3.20 + 6.80 + 7.50 + 9.00 = 31.00. The total is 36.00. The gap is 5.00.",
+      "Only one menu item costs exactly 5.00."
+    ],
+    answers: ["EAU GAZEUSE","EAUGAZEUSE","WATER","SPARKLING WATER","SPARKLINGWATER"],
+    _solution: "EAU GAZEUSE",
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Lines sum to 31.00; printed total is 36.00. The missing 5.00 is the eau gazeuse — the only menu item priced at exactly 5."
+  },
+  {
+    id: 3, title: "The Three Statements", chapter: "III", location: "Hotel Lethe, the morning after",
+    scene: "witnesses",
+    body: [
+      "Three guests gave statements about Tuesday evening at the Lethe. Two are telling the truth. One is lying.",
+      "  · DAWES (room 204): \"I came down at 8:45. The desk clock said 8:46. I sat by the piano. The pianist played until 9:30, then stood up and left.\"",
+      "  · ELLIS (room 311): \"I was at the bar from 8:30 to 10:00. The pianist played the whole time, never broke. The piano stopped only when the lights went out at ten.\"",
+      "  · FRYE (room 105): \"Checked in at 8:50. Lobby clock said 8:51. I went straight to my room and heard the piano through the wall till ten.\"",
+      "Reyes already knows which clock is right. She wants the liar."
+    ],
+    artifact: { kind: "matchbook", code: "1 LIAR", sub: "deduce who" },
+    prompt: "Who is lying?",
+    inputLabel: "A name",
+    placeholder: "dawes / ellis / frye",
+    hints: [
+      "Pick the detail that contradicts: when did the pianist stop?",
+      "Dawes says 9:30. Ellis says 10:00. Frye says ten as well.",
+      "Dawes is alone in his story."
+    ],
+    answers: ["DAWES"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Two of three corroborate the pianist playing until ten. Dawes alone says 9:30. Dawes is the liar."
+  },
+  {
+    id: 4, title: "The Lineup", chapter: "IV", location: "Behind the one-way glass",
+    scene: "lineup",
+    body: [
+      "The witness was certain on three things and uncertain on the rest.",
+      "  · The man was right-handed.",
+      "  · He wore wire-rimmed glasses.",
+      "  · He had a small scar on his LEFT cheek.",
+      "Five men stand under the lineup lights:",
+      "  · #1 — right-handed. Bare-faced. No glasses.",
+      "  · #2 — right-handed. Scar on RIGHT cheek. Wire-rimmed glasses.",
+      "  · #3 — left-handed. Wire-rimmed glasses. Scar on left cheek.",
+      "  · #4 — right-handed. Wire-rimmed glasses. Scar on left cheek.",
+      "  · #5 — right-handed. Wire-rimmed glasses. No scar.",
+      "Pick one."
+    ],
+    artifact: { kind: "door", slots: 5 },
+    prompt: "Which suspect?",
+    inputLabel: "1–5",
+    placeholder: "?",
+    hints: [
+      "Cross out anyone who fails any of the three certainties.",
+      "#1: no glasses, fails. #2: scar on wrong cheek, fails. #3: left-handed, fails. #5: no scar, fails.",
+      "Only one remains."
+    ],
+    answers: ["4","FOUR"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z0-9]/g,""),
+    explain: "Right-handed + wire-rims + scar on the LEFT cheek — only suspect #4 satisfies all three."
+  },
+  {
+    id: 5, title: "The Plate", chapter: "V", location: "Witness statement — hit and run",
+    scene: "plate",
+    body: [
+      "The hit-and-run report had a partial plate. The witness was sure of the format and three of the four characters' positions:",
+      "  B  _  5  K  2  _",
+      "Six characters total. The two missing are digits.",
+      "She was also sure of three things:",
+      "  · The two missing digits are equal.",
+      "  · Their sum is fourteen.",
+      "  · The plate is registered.",
+      "What was the plate?"
+    ],
+    artifact: { kind: "matchbook", code: "B _ 5 K 2 _", sub: "two missing digits" },
+    prompt: "Full plate.",
+    inputLabel: "6 characters",
+    placeholder: "B?5K2?",
+    hints: [
+      "Equal and summing to fourteen — solve for the digit.",
+      "If both digits are d, then 2d = 14 → d = 7.",
+      "The plate reads B 7 5 K 2 7."
+    ],
+    answers: ["B75K27"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z0-9]/g,""),
+    explain: "Two equal digits summing to 14 means each is 7. Plate: B75K27."
+  },
+  {
+    id: 6, title: "The Snapshot", chapter: "VI", location: "Polaroid, taken at 11:14",
+    scene: "snapshot",
+    body: [
+      "The polaroid is in front of you. Reyes wants one detail.",
+      "A study, dim lamp on the desk. On the desk:",
+      "  · A typewriter, half-rolled page.",
+      "  · A coffee mug, ring-stained.",
+      "  · A single matchstick, burnt, set across an unlit cigarette.",
+      "  · A wristwatch, face-down.",
+      "  · A handwritten note, three words, partially obscured.",
+      "Behind the desk, a tall window — heavy curtains, drawn nearly shut. A clock on the mantel: the hour hand near the 12, the minute hand pointing at the 9.",
+      "What time does the mantel clock show? (HH:MM, 12-hour.)"
+    ],
+    artifact: { kind: "clock", time: "?" },
+    prompt: "Mantel clock time.",
+    inputLabel: "HH:MM",
+    placeholder: "?:??",
+    hints: [
+      "Minute hand at the 9 means 45 minutes past the hour.",
+      "Hour hand near (but not at) the 12 means it's still in the 12 o'clock hour.",
+      "12:45."
+    ],
+    answers: ["12:45","1245","12.45"],
+    normalize: (s) => s.replace(/[^0-9]/g,""),
+    explain: "Minute hand on the 9 = :45. Hour hand near 12, drifting toward 1 = 12 o'clock. 12:45."
+  },
+  {
+    id: 7, title: "The Composite", chapter: "VII", location: "Reyes' notebook, last page",
+    scene: "composite",
+    body: [
+      "Five witnesses, five fragments. Reyes interviewed them in order. Each gave one feature.",
+      "  · First: \"Olive complexion. He stood out.\"",
+      "  · Second: \"Right-handed. I watched him reach for his keys.\"",
+      "  · Third: \"Six feet, easily.\"",
+      "  · Fourth: \"One earring. Left lobe.\"",
+      "  · Fifth: \"Nervous tic — kept blinking.\"",
+      "Read the first letter of each remembered feature, in the order they were spoken.",
+      "Reyes wrote one word at the bottom of the page. What did she write?"
+    ],
+    artifact: { kind: "door", slots: 5 },
+    prompt: "The killer's first name.",
+    inputLabel: "5 letters",
+    placeholder: "?",
+    hints: [
+      "Each feature opens with a key word: Olive, Right-handed, Six, One, Nervous.",
+      "First letter of each: O, R, S, O, N.",
+      "Five letters. A name."
+    ],
+    answers: ["ORSON"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Olive · Right · Six · One · Nervous → O-R-S-O-N. ORSON."
+  }
+];
+
+const TRACK_OXBLOOD = [
+  {
+    id: 1, title: "The Atbash", chapter: "I", location: "Lining of his coat",
+    scene: "atbash",
+    body: [
+      "Intercept #001, found stitched into the lining of his overcoat.",
+      "He always favored old systems. Hebrew scribes invented this one two and a half thousand years ago: each letter swaps with its mirror across the alphabet — A is Z, B is Y, and so on.",
+      "Cipher:",
+      "  GSV PVB RH SVIV",
+      "Decode."
+    ],
+    artifact: { kind: "letter", lines: [
+      "GSV  PVB  RH  SVIV",
+      "",
+      "(atbash)",
+      "(A↔Z, B↔Y, C↔X …)"
+    ]},
+    prompt: "The plaintext.",
+    inputLabel: "Four words",
+    placeholder: "?",
+    hints: [
+      "Each letter maps to its mirror: position k ↔ position (27 − k).",
+      "G↔T, S↔H, V↔E. So GSV → THE.",
+      "Continue: PVB → KEY, RH → IS, SVIV → HERE."
+    ],
+    answers: ["THE KEY IS HERE","THEKEYISHERE"],
+    _solution: "THE KEY IS HERE",
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Atbash maps A↔Z, B↔Y, C↔X… GSV PVB RH SVIV → THE KEY IS HERE."
+  },
+  {
+    id: 2, title: "The Polybius", chapter: "II", location: "Margin of Suetonius, page 200",
+    scene: "polybius",
+    body: [
+      "She'd written digits in the gutter of her copy of Suetonius — small, careful pencil:",
+      "  21  24  33  14    23  15  42",
+      "A Polybius square. Standard 5×5, A through Z (I and J share a cell). Each pair is row-then-column.",
+      "  ",
+      "      1 2 3 4 5",
+      "    1 A B C D E",
+      "    2 F G H I K",
+      "    3 L M N O P",
+      "    4 Q R S T U",
+      "    5 V W X Y Z",
+      "What did she write?"
+    ],
+    artifact: { kind: "matchbook", code: "21·24·33·14 · 23·15·42", sub: "row · column" },
+    prompt: "The plaintext.",
+    inputLabel: "Two words",
+    placeholder: "?",
+    hints: [
+      "21 = row 2, col 1 = F. 24 = row 2, col 4 = I.",
+      "33 = N. 14 = D. So the first word is FIND.",
+      "23 = H. 15 = E. 42 = R. The second word: HER."
+    ],
+    answers: ["FIND HER","FINDHER"],
+    _solution: "FIND HER",
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "21=F, 24=I, 33=N, 14=D | 23=H, 15=E, 42=R — FIND HER."
+  },
+  {
+    id: 3, title: "The Tap Code", chapter: "III", location: "Night watchman's pipe log",
+    scene: "morse",
+    body: [
+      "The hotel manager replayed the night watchman's tap log. Coin against radiator pipe — the entire night.",
+      "Stenographer's transcription, dots for short, dashes for long, slashes between letters:",
+      "  ··· / -·-· / ·- / ·-· / ·-·· / · / -",
+      "Standard Morse. One word."
+    ],
+    artifact: { kind: "letter", lines: [
+      "···  -·-·  ·-  ·-·  ·-··  ·  -",
+      "",
+      "(international Morse)",
+      "(short = dot, long = dash)"
+    ]},
+    prompt: "The word.",
+    inputLabel: "7 letters",
+    placeholder: "?",
+    hints: [
+      "··· = S. -·-· = C. ·- = A.",
+      "·-· = R. ·-·· = L. · = E. - = T.",
+      "Read them in order."
+    ],
+    answers: ["SCARLET"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "··· -·-· ·- ·-· ·-·· · - → S C A R L E T. The watchman tapped a single word all night: SCARLET."
+  },
+  {
+    id: 4, title: "The Vigenère", chapter: "IV", location: "Folded inside her copy of Poe",
+    scene: "vigenere",
+    body: [
+      "She'd written one word above the cipher, circled three times: KEY.",
+      "The intercepted ciphertext, six letters:",
+      "  KXLSRC",
+      "Vigenère cipher. The keyword KEY repeats; you subtract it (modulo 26) from the cipher to recover the plaintext.",
+      "  ",
+      "What did she mean?"
+    ],
+    artifact: { kind: "matchbook", code: "KXLSRC", sub: "keyword: KEY" },
+    prompt: "The decoded message.",
+    inputLabel: "Two words",
+    placeholder: "?",
+    hints: [
+      "Repeat the keyword to match the cipher length: KEYKEY.",
+      "Subtract each keyword letter from the cipher letter (A=0…Z=25, mod 26). K(10)−K(10)=0=A, X(23)−E(4)=19=T.",
+      "Continue: L−Y=N, S−K=I, R−E=N, C−Y=E. AT NINE."
+    ],
+    answers: ["AT NINE","ATNINE"],
+    _solution: "AT NINE",
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "KXLSRC − KEYKEY = ATNINE. She wanted to meet at nine."
+  },
+  {
+    id: 5, title: "The Rail Fence", chapter: "V", location: "Telegram, intercepted",
+    scene: "railfence",
+    body: [
+      "Three rails. Zigzag. Read the rails left to right, top to bottom.",
+      "Cipher:",
+      "  MMNTETEOIHETG",
+      "Reconstruct the original message — three words.",
+      "(13 letters total, exactly. Three rails carries 4 + 6 + 3 letters in that order.)"
+    ],
+    artifact: { kind: "letter", lines: [
+      "MMNTETEOIHETG",
+      "",
+      "(rail fence, depth 3)",
+      "(rails: 4, 6, 3)"
+    ]},
+    prompt: "The plaintext.",
+    inputLabel: "Three words",
+    placeholder: "?",
+    hints: [
+      "First rail (4 letters): M M N T. These are positions 0, 4, 8, 12 of the original.",
+      "Second rail (6 letters): E T E O I H — positions 1, 3, 5, 7, 9, 11.",
+      "Third rail (3 letters): E T G — positions 2, 6, 10. Interleave: M E E T M E T O N I G H T."
+    ],
+    answers: ["MEET ME TONIGHT","MEETMETONIGHT"],
+    _solution: "MEET ME TONIGHT",
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Rails reassembled in zigzag order spell MEET ME TONIGHT."
+  },
+  {
+    id: 6, title: "The Book Cipher", chapter: "VI", location: "Her commonplace book, ribbon-marked",
+    scene: "bookcipher",
+    body: [
+      "Five lines from the page she ribbon-marked.",
+      "  1: Find the lighthouse on the cliff",
+      "  2: She left her copy of Nabokov on the desk",
+      "  3: Everyone arrived at sunset",
+      "  4: Past midnight the streets emptied",
+      "  5: She left every clue she ever wrote",
+      "Indices in pencil at the top of the page:",
+      "  1.1 / 2.3 / 3.3 / 4.2",
+      "Format: line.word. Read the four words she circled."
+    ],
+    artifact: { kind: "book", lines: [
+      "Find the lighthouse",
+      "She left her copy",
+      "Everyone arrived at sunset",
+      "Past midnight the streets",
+      "She left every clue"
+    ], code:[1,1,1] },
+    prompt: "The four words.",
+    inputLabel: "Four words",
+    placeholder: "?",
+    hints: [
+      "1.1 means line 1, word 1: Find.",
+      "2.3 = her. 3.3 = at. 4.2 = midnight.",
+      "Read them in order."
+    ],
+    answers: ["FIND HER AT MIDNIGHT","FINDHERATMIDNIGHT"],
+    _solution: "FIND HER AT MIDNIGHT",
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "Indexed words: Find · her · at · midnight."
+  },
+  {
+    id: 7, title: "The One-Time Pad", chapter: "VII", location: "Tucked into Shannon's paper",
+    scene: "onetimepad",
+    body: [
+      "She kept a one-time pad in the back of her copy of Shannon. Three pages of random letters; the relevant fragment, exactly seven characters:",
+      "  KQNRJZK",
+      "The intercepted ciphertext, also seven:",
+      "  OIPRYDN",
+      "OTP decryption: subtract the pad from the cipher (modular, A=0 … Z=25). One word.",
+      "It was the last thing she wrote."
+    ],
+    artifact: { kind: "letter", lines: [
+      "cipher : OIPRYDN",
+      "pad    : KQNRJZK",
+      "",
+      "(plain = cipher − pad)",
+      "(modulo 26)"
+    ]},
+    prompt: "The plaintext.",
+    inputLabel: "One word",
+    placeholder: "?",
+    hints: [
+      "O(14) − K(10) = 4 = E. I(8) − Q(16) = −8 ≡ 18 = S.",
+      "P(15) − N(13) = 2 = C. R(17) − R(17) = 0 = A. Y(24) − J(9) = 15 = P.",
+      "D(3) − Z(25) = −22 ≡ 4 = E. N(13) − K(10) = 3 = D. Read them in order."
+    ],
+    answers: ["ESCAPED"],
+    normalize: (s) => s.toUpperCase().replace(/[^A-Z]/g,""),
+    explain: "(O−K, I−Q, P−N, R−R, Y−J, D−Z, N−K) mod 26 = (4, 18, 2, 0, 15, 4, 3) = ESCAPED."
+  }
+];
+
 const TRACKS = {
   navy: { name: "The Cipher Room", subtitle: "Narrative · cipher · deduction", levels: window.LEVELS },
   black: { name: "Black Box", subtitle: "Pure logic · liars & locks", levels: TRACK_BLACK },
   bone: { name: "The Manuscript", subtitle: "Words · anagrams · acrostics", levels: TRACK_BONE },
-  forest: { name: "The Cartographer", subtitle: "Spatial · geometry · pattern", levels: TRACK_FOREST }
+  forest: { name: "The Cartographer", subtitle: "Spatial · geometry · pattern", levels: TRACK_FOREST },
+  charcoal: { name: "The Witness", subtitle: "Observation · memory · detail", levels: TRACK_CHARCOAL },
+  oxblood: { name: "The Cryptanalyst", subtitle: "Ciphers · codes · keys", levels: TRACK_OXBLOOD }
 };
 
 window.TRACKS = TRACKS;

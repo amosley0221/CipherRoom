@@ -75,10 +75,10 @@ function Landing({ onEnter, palette, levelsCleared, paletteKey, onChoosePalette,
             Read carefully. Look closer. Nothing on this page is decoration.
           </p>
 
-          {/* Four-color mode dots */}
+          {/* Six-color mode dots, wrapping to a 2-row grid */}
           <div className="landing-dots" style={{
             display:"flex", gap:24, justifyContent:"center", marginTop:36,
-            alignItems:"center"
+            alignItems:"center", flexWrap:"wrap", maxWidth:520, marginLeft:"auto", marginRight:"auto"
           }}>
             {Object.entries(palettes).map(([key, p]) => {
               const selected = key === paletteKey;
