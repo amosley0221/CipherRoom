@@ -5,7 +5,7 @@
 //     users one load behind for layout / meta-tag fixes.
 //   - JSX modules + CDN libs + assets: stale-while-revalidate.
 
-const VERSION = "v6";
+const VERSION = "v7";
 const SHELL_CACHE = `cipher-shell-${VERSION}`;
 const RUNTIME_CACHE = `cipher-runtime-${VERSION}`;
 

@@ -5,12 +5,16 @@
 const { useState: useStateIP, useRef: useRefIP, useEffect: useEffectIP } = React;
 
 /* ---------- ConstellationPuzzle ----------
- * 3×3 grid minus center (8 dots). User draws lines from dot to dot.
- * Goal: cover all 8 dots in N or fewer continuous straight segments.
- * Lines must extend in straight paths; user clicks dots in order.
- * They can hit "Submit" to validate or "Reset" to start over.
+ * 3×3 grid minus center (8 dots). User draws a continuous path by tapping
+ * dots in order. Any dot lying ON the segment between two consecutive taps
+ * is auto-credited as visited — so tapping just the 4 corners around the
+ * perimeter covers all 8 dots in 4 segments.
+ *
+ * Goal: cover all 8 dots in N or fewer continuous straight segments. With 8
+ * outer dots the proven minimum is 4 (each line in the set covers at most
+ * 3 collinear dots, and the 4 outer rows/cols are needed to cover them all).
  */
-function ConstellationPuzzle({ onSolve, onWrong, palette, targetSegments = 3 }) {
+function ConstellationPuzzle({ onSolve, onWrong, palette, targetSegments = 4 }) {
   // 8 dot positions (3×3 grid, no center)
   const dots = [
     {x:0,y:0},{x:1,y:0},{x:2,y:0},
@@ -29,9 +33,38 @@ function ConstellationPuzzle({ onSolve, onWrong, palette, targetSegments = 3 }) 
     y: PAD + dots[i].y * cellH
   });
 
+  // Indices of dots that lie on the segment between path[i-1] and path[i]
+  // (auto-credited so users don't have to tap every intermediate dot).
+  function dotsOnSegment(aIdx, bIdx) {
+    if (aIdx === bIdx) return [];
+    const a = dots[aIdx], b = dots[bIdx];
+    const out = [];
+    for (let k = 0; k < dots.length; k++) {
+      if (k === aIdx || k === bIdx) continue;
+      const c = dots[k];
+      // collinearity
+      const cross = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+      if (cross !== 0) continue;
+      // strictly between in at least one dimension
+      const betweenX = Math.min(a.x, b.x) <= c.x && c.x <= Math.max(a.x, b.x);
+      const betweenY = Math.min(a.y, b.y) <= c.y && c.y <= Math.max(a.y, b.y);
+      if (betweenX && betweenY) out.push(k);
+    }
+    return out;
+  }
+
+  function visitedSet(p) {
+    const s = new Set(p);
+    for (let i = 1; i < p.length; i++) {
+      dotsOnSegment(p[i - 1], p[i]).forEach((k) => s.add(k));
+    }
+    return s;
+  }
+
   function handleDotClick(i) {
     if (path[path.length-1] === i) return;
     setPath([...path, i]);
+    setFeedback(null);
     window.AudioFX?.click();
   }
 
@@ -52,7 +85,7 @@ function ConstellationPuzzle({ onSolve, onWrong, palette, targetSegments = 3 }) 
   }
 
   function check() {
-    const visited = new Set(path);
+    const visited = visitedSet(path);
     if (visited.size < 8) {
       setFeedback({type:"wrong", msg:`${visited.size}/8 dots visited`});
       onWrong?.();
@@ -73,6 +106,8 @@ function ConstellationPuzzle({ onSolve, onWrong, palette, targetSegments = 3 }) 
     const p = dotPos(i);
     return `${idx === 0 ? "M" : "L"} ${p.x} ${p.y}`;
   }).join(" ");
+
+  const visitedNow = visitedSet(path);
 
   return (
     <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:14}}>
@@ -103,7 +138,8 @@ function ConstellationPuzzle({ onSolve, onWrong, palette, targetSegments = 3 }) 
         {/* dots */}
         {dots.map((_, i) => {
           const p = dotPos(i);
-          const visited = path.includes(i);
+          const tapped = path.includes(i);
+          const visited = visitedNow.has(i);
           const order = path.indexOf(i);
           const isLast = path[path.length-1] === i;
           return (
@@ -118,7 +154,7 @@ function ConstellationPuzzle({ onSolve, onWrong, palette, targetSegments = 3 }) 
                 stroke={palette.accent}
                 strokeWidth={visited ? 0 : 1.5}
                 style={{transition:"all .2s",filter:visited?`drop-shadow(0 0 8px ${palette.accent})`:"none"}}/>
-              {visited && (
+              {tapped && (
                 <text x={p.x} y={p.y+4} textAnchor="middle"
                   fill="#000" fontSize="11" fontFamily="var(--mono)" fontWeight="700">
                   {order+1}
@@ -133,7 +169,7 @@ function ConstellationPuzzle({ onSolve, onWrong, palette, targetSegments = 3 }) 
         <span style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--fg-mute)",letterSpacing:".15em"}}>
           {path.length === 0 ? "tap dots to draw a path" :
             feedback ? "" :
-            `${new Set(path).size}/8 dots · ${countSegments(path)} segments`}
+            `${visitedNow.size}/8 dots · ${countSegments(path)} segments`}
         </span>
         {feedback && (
           <span style={{

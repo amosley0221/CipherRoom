@@ -144,7 +144,7 @@ function Game({ levelIdx, levels, onSolve, onBack, palette, hintsEnabled, soundE
             <label className="eyebrow">{level.inputLabel}</label>
             <window.ConstellationPuzzle
               palette={palette}
-              targetSegments={3}
+              targetSegments={4}
               onSolve={() => { setStatus("right"); window.AudioFX.chime(); setTimeout(() => onSolve(), 1400); }}
               onWrong={() => { setStatus("wrong"); setShake(true); window.AudioFX.fail(); setTimeout(() => setShake(false), 400); }}
             />

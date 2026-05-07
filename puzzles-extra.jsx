@@ -303,21 +303,21 @@ const TRACK_FOREST = [
       "  · · ·",
       "  ·   ·",
       "  · · ·",
-      "Beside it she wrote: \"draw it without lifting your hand. fewer lines than you think.\"",
-      "Connect the dots. One continuous path. As few segments as possible."
+      "Beside it she wrote: \"draw it without lifting your hand. one continuous path.\"",
+      "Connect every star. Tap from one to another — any star that lies on the line you draw counts too."
     ],
     artifact: { kind: "diner", letters: ["·","·","·","·","·","·","·","·"] },
     prompt: "Draw a path through every dot.",
     inputLabel: "Trace the constellation",
     placeholder: "?",
     hints: [
-      "If you only travel along the rectangle's edges, you can't cover the corners and middles in fewer than 8 segments.",
-      "But you can go diagonally — and you can extend lines past the implied edge of the box.",
-      "Three lines is achievable if each segment runs past the corners."
+      "Tapping two stars in a row draws a line between them — any star sitting on that line is credited automatically.",
+      "Four corners, four straight strokes — try the perimeter and let the middles fill themselves in.",
+      "Four segments is the minimum: each side of the square is one stroke, and the middle stars on each side are picked up along the way."
     ],
-    answers: ["3","THREE"],
+    answers: ["4","FOUR"],
     normalize: (s) => s.toUpperCase().replace(/[^A-Z0-9]/g,""),
-    explain: "Three lines suffice if you draw past the corners — extending each segment outside the implied box."
+    explain: "Four strokes around the perimeter cover all eight stars: each side picks up its middle star on the way."
   },
   {
     id: 3, title: "The Tiling", chapter: "III", location: "Garden path, partially laid",
