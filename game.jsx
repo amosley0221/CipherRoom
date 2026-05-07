@@ -14,6 +14,19 @@ function Game({ levelIdx, levels, onSolve, onBack, palette, hintsEnabled, soundE
   const [bodyShown, setBodyShown] = useStateG(0);
   const [artifactOpened, setArtifactOpened] = useStateG(false);
   const inputRef = useRefG(null);
+  const bottomRef = useRefG(null);
+
+  // Auto-scroll the chapter container so a newly-shown hint or the revealed
+  // explanation lands in view. scrollIntoView walks up to whichever ancestor
+  // is the actual scroll container (.game-left on desktop, .game-grid on
+  // mobile), so the same call works on both layouts.
+  useEffectG(() => {
+    if (hintsShown === 0 && !revealed) return;
+    const id = window.requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [hintsShown, revealed]);
 
   // type-out narrative lines
   useEffectG(() => {
@@ -219,6 +232,7 @@ function Game({ levelIdx, levels, onSolve, onBack, palette, hintsEnabled, soundE
           )}
         </div>
         )}
+        <div ref={bottomRef} style={{height:1,scrollMarginBottom:24}} aria-hidden="true"/>
       </div>
 
       {/* RIGHT — 3D + interactive artifact */}
