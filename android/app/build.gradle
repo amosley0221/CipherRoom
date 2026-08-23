@@ -1,3 +1,5 @@
+import javax.inject.Inject
+
 plugins {
     id 'com.android.application'
 }
@@ -62,19 +64,61 @@ dependencies {
     implementation 'androidx.webkit:webkit:1.11.0'
 }
 
-// Make sure the web app is bundled into src/main/assets before the APK is
-// packaged, so `gradlew assembleRelease` alone produces a complete build.
-def bundleWebApp = tasks.register('bundleWebApp', Exec) {
-    group = 'build'
-    description = 'Copies the Cipher Room web app into src/main/assets (never modifies the site itself).'
-    workingDir rootProject.projectDir.parentFile
-    commandLine 'python3', 'tools/build_web_assets.py'
-    inputs.files(fileTree(rootProject.projectDir.parentFile) {
-        include 'index.html', '*.jsx', 'manifest.webmanifest', 'icons/**', 'tools/build_web_assets.py'
-    })
-    outputs.dir("${projectDir}/src/main/assets")
+/**
+ * Runs tools/build_web_assets.py, which copies the Cipher Room web app into a
+ * generated directory and vendors its CDN dependencies. The website itself is
+ * never touched -- only the copy is rewritten.
+ */
+abstract class BundleWebApp extends DefaultTask {
+
+    /** Repository root, i.e. where the site and the bundler script live. */
+    @Internal
+    abstract DirectoryProperty getRepoRoot()
+
+    /** Everything the bundle is built from, so the task can go up to date. */
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract ConfigurableFileCollection getSiteFiles()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDir()
+
+    @Inject
+    abstract ExecOperations getExecOperations()
+
+    @TaskAction
+    void bundle() {
+        execOperations.exec {
+            it.workingDir = repoRoot.get().asFile
+            it.commandLine 'python3', 'tools/build_web_assets.py',
+                    '--out', outputDir.get().asFile.absolutePath
+        }
+    }
 }
 
-tasks.matching { it.name.startsWith('merge') && it.name.endsWith('Assets') }.configureEach {
-    dependsOn bundleWebApp
+def repoRootDir = rootProject.layout.projectDirectory.dir("..")
+
+def bundleWebApp = tasks.register('bundleWebApp', BundleWebApp) {
+    group = 'build'
+    description = 'Bundles the Cipher Room web app into the APK assets.'
+    repoRoot.set(repoRootDir)
+    // Explicit includes rather than a walk of the repository root: the output
+    // directory lives under android/app/build, and must not become an input.
+    siteFiles.from(project.fileTree(repoRootDir) {
+        include 'index.html'
+        include 'manifest.webmanifest'
+        include '*.jsx'
+        include 'icons/**'
+        include 'tools/build_web_assets.py'
+        exclude 'android/**'
+    })
+    outputDir.set(layout.buildDirectory.dir("generated/webAssets"))
+}
+
+// Registering the output as a *generated* asset directory is what makes every
+// consumer -- asset merging, packaging, lint -- depend on the task properly.
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.sources.assets.addGeneratedSourceDirectory(bundleWebApp) { it.outputDir }
+    }
 }
