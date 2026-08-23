@@ -1,0 +1,7 @@
+# Bundled by tools/build_web_assets.py on every build.
+app/src/main/assets/
+
+.gradle/
+build/
+app/build/
+local.properties

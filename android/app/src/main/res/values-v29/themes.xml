@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CipherRoom" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/brand_navy</item>
+        <item name="android:navigationBarColor">@color/brand_navy</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/brand_navy</item>
+        <!-- The page paints its own palettes, one of which is light. Android's
+             force-dark would invert that one; opt the whole window out. -->
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>

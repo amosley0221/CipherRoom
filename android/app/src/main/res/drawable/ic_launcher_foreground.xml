@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The 512px icon already frames its content at ~67% of the canvas, which sits
+     right on the adaptive-icon safe-zone boundary. The inset pulls it in far
+     enough that circular and squircle masks never clip the outer ring. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_cipher_mark"
+    android:inset="6%" />

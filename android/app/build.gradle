@@ -1,0 +1,80 @@
+plugins {
+    id 'com.android.application'
+}
+
+// versionCode / versionName are supplied by CI (-PversionCode=... -PversionName=...);
+// the defaults keep a plain `gradlew assembleRelease` working locally.
+def buildVersionCode = (project.findProperty('versionCode') ?: '1') as Integer
+def buildVersionName = (project.findProperty('versionName') ?: '1.0.0') as String
+
+android {
+    namespace 'com.cipherroom.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.cipherroom.app"
+        minSdk 24
+        targetSdk 34
+        versionCode buildVersionCode
+        versionName buildVersionName
+        // No native code, no per-density resources: one APK covers every device.
+    }
+
+    signingConfigs {
+        release {
+            // Defaults point at the checked-in key so that anyone can build an
+            // installable APK with no setup. CI overrides all four values from
+            // repository secrets when they are configured -- see
+            // .github/workflows/android-apk.yml.
+            storeFile file(System.getenv("CIPHER_KEYSTORE_FILE")
+                    ?: "${rootDir}/keystore/cipherroom.jks")
+            storePassword System.getenv("CIPHER_KEYSTORE_PASSWORD") ?: "cipherroom"
+            keyAlias System.getenv("CIPHER_KEY_ALIAS") ?: "cipherroom"
+            keyPassword System.getenv("CIPHER_KEY_PASSWORD") ?: "cipherroom"
+        }
+    }
+
+    buildTypes {
+        release {
+            // The app is a thin WebView shell -- there is nothing to shrink, and
+            // leaving R8 off keeps the build reproducible and fast.
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError false
+    }
+}
+
+dependencies {
+    // WebViewAssetLoader + the feature-detection helpers used by MainActivity.
+    implementation 'androidx.webkit:webkit:1.11.0'
+}
+
+// Make sure the web app is bundled into src/main/assets before the APK is
+// packaged, so `gradlew assembleRelease` alone produces a complete build.
+def bundleWebApp = tasks.register('bundleWebApp', Exec) {
+    group = 'build'
+    description = 'Copies the Cipher Room web app into src/main/assets (never modifies the site itself).'
+    workingDir rootProject.projectDir.parentFile
+    commandLine 'python3', 'tools/build_web_assets.py'
+    inputs.files(fileTree(rootProject.projectDir.parentFile) {
+        include 'index.html', '*.jsx', 'manifest.webmanifest', 'icons/**', 'tools/build_web_assets.py'
+    })
+    outputs.dir("${projectDir}/src/main/assets")
+}
+
+tasks.matching { it.name.startsWith('merge') && it.name.endsWith('Assets') }.configureEach {
+    dependsOn bundleWebApp
+}

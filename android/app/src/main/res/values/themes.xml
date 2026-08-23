@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CipherRoom" parent="@android:style/Theme.Material.NoActionBar">
+        <!-- Match the system bars to the page background so the WebView reads
+             as one full-bleed surface instead of a page in a black frame. -->
+        <item name="android:statusBarColor">@color/brand_navy</item>
+        <item name="android:navigationBarColor">@color/brand_navy</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <!-- Shown during the cold-start window, before the WebView paints. -->
+        <item name="android:windowBackground">@color/brand_navy</item>
+    </style>
+</resources>

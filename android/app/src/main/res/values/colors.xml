@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The site's default "navy" palette background. -->
+    <color name="brand_navy">#0c1530</color>
+    <color name="ic_launcher_background">#0c1530</color>
+</resources>
